@@ -1,0 +1,22 @@
+# node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# build 결과물
+dist/
+build/
+
+# env
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/
+.idea/
+
+# logs
+*.log
