@@ -1,45 +1,65 @@
-import { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom'
+import Home from './pages/Home'
+import Login from './pages/Login'
+import Signup from './pages/Signup'
+import MyPrediction from './pages/MyPrediction'
+import { getToken, clearToken } from './auth'
 
-function App() {
-  // const [count, setCount] = useState(0)
+function NavBar() {
+  const navigate = useNavigate()
+  const token = getToken()
 
-  // return (
-  //   <>
-  //     <div>
-  //       <a href="https://vite.dev" target="_blank">
-  //         <img src={viteLogo} className="logo" alt="Vite logo" />
-  //       </a>
-  //       <a href="https://react.dev" target="_blank">
-  //         <img src={reactLogo} className="logo react" alt="React logo" />
-  //       </a>
-  //     </div>
-  //     <h1>Vite + React</h1>
-  //     <div className="card">
-  //       <button onClick={() => setCount((count) => count + 1)}>
-  //         count is {count}
-  //       </button>
-  //       <p>
-  //         Edit <code>src/App.jsx</code> and save to test HMR
-  //       </p>
-  //     </div>
-  //     <p className="read-the-docs">
-  //       Click on the Vite and React logos to learn more
-  //     </p>
-  //   </>
-  // )
+  return (
+    <div style={{ display: 'flex', gap: 12, padding: 12, borderBottom: '1px solid #ddd' }}>
+      <Link to="/">메인</Link>
+      <Link to="/myprediction">내 스코어 등록</Link>
 
-  const [msg, setMsg] = useState('')
-
-  useEffect(() => {
-    fetch('/api/hello')
-      .then(res => res.json())
-      .then(data => setMsg(data.message))
-  }, [])
-
-  return <h1>{msg}</h1>
+      <div style={{ marginLeft: 'auto', display: 'flex', gap: 12 }}>
+        {!token ? (
+          <>
+            <Link to="/login">로그인</Link>
+            <Link to="/signup">회원가입</Link>
+          </>
+        ) : (
+          <button
+            onClick={() => {
+              clearToken()
+              navigate('/')
+            }}
+          >
+            로그아웃
+          </button>
+        )}
+      </div>
+    </div>
+  )
 }
 
-export default App
+function RequireAuth({ children }) {
+  const token = getToken()
+  if (!token) return <Navigate to="/login" replace />
+  return children
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <NavBar />
+      <div style={{ padding: 16, fontFamily: 'sans-serif' }}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route
+            path="/myprediction"
+            element={
+              <RequireAuth>
+                <MyPrediction />
+              </RequireAuth>
+            }
+          />
+        </Routes>
+      </div>
+    </BrowserRouter>
+  )
+}

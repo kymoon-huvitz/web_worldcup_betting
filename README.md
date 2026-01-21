@@ -1,207 +1,176 @@
-새 환경에서 본 저장소에서 pull 받은 후
+# Web Worldcup Betting
 
--> frontend 폴더 내에서 npm install
--> backend 폴더 내에서 npm install
+프론트엔드(React + Vite)와 백엔드(Express + Prisma + SQLite)를 하나의 저장소(monorepo)로 관리하는 프로젝트입니다.
 
-하여 개발 환경 구축 완료
+---
 
+## 📁 프로젝트 구조
+```
+web_worldcup_betting/
+├─ frontend/          # React (Vite)
+├─ backend/           # Express + Prisma
+├─ .gitignore
+└─ README.md
+```
 
-아래 내용은 처음 환경 구축하는 법 
+---
 
-Frontend -> React + vite
-Backend -> Express
+## 🧩 기술 스택
+- **Frontend**: React, Vite
+- **Backend**: Node.js, Express
+- **Auth**: JWT
+- **DB**: SQLite
+- **ORM**: Prisma
 
+---
 
-Frontend Setting
+## ✅ Git에 포함 / 제외
+### 포함
+- `frontend/` 소스 코드
+- `backend/` 소스 코드
+- `backend/prisma/schema.prisma`
+- `backend/prisma/migrations/**`
 
-1️⃣ Node.js 설치 확인
+### 제외 (`.gitignore`)
+- `node_modules/`
+- `.env`
+- `*.db` (SQLite DB 파일)
+- `frontend/dist/`
 
-Vite는 Node.js가 필요해요.
+---
 
+## 🚀 새 PC에서 실행하기 (개발 모드)
+
+### 1) 사전 설치
+- Git
+- Node.js **18 또는 20 LTS**
+
+확인:
+```bash
 node -v
 npm -v
+git --version
+```
 
+---
 
-안 나오면 → https://nodejs.org
+### 2) 저장소 클론
+```bash
+git clone <REPO_URL>
+cd web_worldcup_betting
+```
 
-LTS 버전 추천
+---
 
-2️⃣ Vite로 React 프로젝트 생성
-
-이미 만든 프로젝트 폴더 안에서 실행하세요.
-
-npm create vite@latest .
-
-
-끝에 . 이 중요합니다 → 현재 폴더에 생성
-
-설문이 나오면 이렇게 선택하세요:
-
-✔ Select a framework: › React
-✔ Select a variant: › JavaScript   (또는 TypeScript)
-
-
-💡 TypeScript 고민되면:
-
-JS 처음이면 → JavaScript
-
-나중에 TS 써도 됨
-
-3️⃣ 의존성 설치
-npm install
-
-이 단계에서 node_modules가 생깁니다.
-
-4️⃣ 개발 서버 실행
-npm run dev
-
-
-터미널에 보통 이렇게 나옵니다:
-
-Local:   http://localhost:5173/
-
-
-👉 브라우저에서 열면 Vite + React 화면이 보일 거예요 🎉
-
-
-
-Backend Setting
-
-
-🔥 제일 많이 쓰는 3가지 패턴
-✅ 1️⃣ 프론트(Vite) + 백엔드(Node.js / Express) 👉 입문 & 실무 최다
-
-개발할 때 가장 무난하고, React랑 궁합이 최고
-
-[ React (Vite) ]  ←→  [ Node.js + Express ]
-
-언제 쓰나?
-
-API 서버 필요
-
-로그인, DB, 파일 업로드
-
-프론트/백 분리 개발
-
-👉 추천 루트
-
-✅ 2️⃣ 프론트(Vite) + 백엔드(Spring / Django / FastAPI)
-
-회사에서 이미 백엔드가 있는 경우
-
-[ React ]  ←→  [ Java / Python 서버 ]
-
-
-API만 JSON으로 통신
-
-React는 화면 전용
-
-⚠️ 3️⃣ Vite + 서버리스 / BaaS (Firebase, Supabase)
-
-빠르지만 개념이 한 번에 많이 나옴
-
-초반엔 비추천
-
-🎯 추천 루트: Express 백엔드 직접 붙이기
-
-아래는 **“지금 당장 돌아가는 최소 세팅”**입니다.
-
-1️⃣ 백엔드 폴더 생성
-
-프론트랑 완전히 분리합니다.
-
-project/
-├─ frontend/   ← React + Vite
-└─ backend/    ← Express
-
-
-이미 React 프로젝트가 있다면:
-
-mkdir backend
+### 3) 백엔드 세팅
+```bash
 cd backend
-npm init -y
+npm install
+```
 
-2️⃣ Express 설치
-npm install express cors
+#### 3-1) 환경 변수 설정
+`backend/.env` 파일 생성:
+```env
+PORT=3000
+JWT_SECRET=dev-secret
+DATABASE_URL="file:./dev.db"
+```
 
+#### 3-2) DB 생성 및 마이그레이션
+```bash
+npx prisma migrate dev
+```
 
-express → 서버
+#### 3-3) 백엔드 실행
+```bash
+node index.js
+```
 
-cors → 프론트에서 API 호출 허용
+API 테스트:
+- http://localhost:3000/api/predictions
 
-3️⃣ 서버 코드 작성 (backend/index.js)
-const express = require('express')
-const cors = require('cors')
+---
 
-const app = express()
-app.use(cors())
-app.use(express.json())
+### 4) 프론트엔드 세팅
+새 터미널에서:
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hello from backend' })
-})
+접속:
+- http://localhost:5173
 
-app.listen(3000, () => {
-  console.log('Backend running on http://localhost:3000')
-})
+---
 
+## 📦 배포처럼 실행하기 (단일 포트 3000)
 
-실행:
+### 1) 프론트 빌드
+```bash
+cd frontend
+npm run build
+```
 
+### 2) 백엔드 실행 (정적 파일 서빙)
+```bash
+cd ../backend
+node index.js
+```
+
+접속:
+- http://localhost:3000/
+
+---
+
+## 🌐 LAN에서 다른 기기 접속
+- 서버 PC의 내부 IP 확인: `ipconfig`
+- 접속: `http://<서버IP>:3000`
+- Windows 방화벽: TCP 3000 포트 (Private) 허용
+
+---
+
+## 🧪 DB 확인 (선택)
+```bash
+cd backend
+npx prisma studio
+```
+
+---
+
+## 🐳 Docker 배포 (요약)
+- Windows에서도 **Linux 컨테이너**로 배포 가능 (Docker Desktop + WSL2)
+- 접속은 **호스트 IP:PORT**로 접근
+- SQLite는 Docker Volume으로 데이터 유지
+
+자세한 Docker 설정은 별도 문서 또는 Dockerfile / docker-compose.yml 참고.
+
+---
+
+## 🔧 트러블슈팅
+- Prisma 오류 시 Node 버전 확인 (18/20 권장)
+- `migrations/` 폴더가 Git에 있는지 확인
+- `.env` 누락 여부 확인
+
+---
+
+## ✨ 실행 요약 (최소)
+```bash
+git clone <REPO_URL>
+cd web_worldcup_betting
+
+cd backend
+npm install
+# .env 생성
+npx prisma migrate dev
 node index.js
 
+cd ../frontend
+npm install
+npm run dev
+```
 
-👉 브라우저에서
-http://localhost:3000/api/hello
-확인
+---
 
-4️⃣ 프론트에서 API 호출 (React)
+필요 시 Docker, HTTPS, 외부 공개 배포로 확장 가능합니다.
 
-App.jsx에서 테스트:
-
-import { useEffect, useState } from 'react'
-
-function App() {
-  const [msg, setMsg] = useState('')
-
-  useEffect(() => {
-    fetch('http://localhost:3000/api/hello')
-      .then(res => res.json())
-      .then(data => setMsg(data.message))
-  }, [])
-
-  return <h1>{msg}</h1>
-}
-
-export default App
-
-
-👉 화면에
-“Hello from backend”
-뜨면 성공 🎉
-
-5️⃣ 개발할 때 꼭 필요한 설정 (Proxy)
-
-매번 localhost:3000 쓰기 귀찮죠?
-Vite proxy 설정하면 깔끔해집니다.
-
-vite.config.js
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3000',
-        changeOrigin: true
-      }
-    }
-  }
-})
-
-
-이제 프론트에서는:
-
-fetch('/api/hello')
