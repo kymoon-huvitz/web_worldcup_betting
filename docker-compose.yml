@@ -1,0 +1,15 @@
+services:
+  worldcup:
+    build: .
+    ports:
+      - "80:3000"
+    environment:
+      - PORT=3000
+      - JWT_SECRET=CHANGE_ME_TO_LONG_RANDOM_STRING
+      - DATABASE_URL=file:/data/prod.db
+    volumes:
+      - worldcup_data:/data
+    restart: unless-stopped
+
+volumes:
+  worldcup_data:
