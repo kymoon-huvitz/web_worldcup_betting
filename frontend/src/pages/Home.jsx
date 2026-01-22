@@ -26,7 +26,7 @@ export default function Home() {
 
   return (
     <div>
-      <h1>월드컵 스코어 맞추기</h1>
+      <h1>Who will be the lucky winner?</h1>
       <p style={{ marginTop: 4, color: '#555' }}>
         대상 경기: <b>{MATCH.label}</b>
       </p>
@@ -42,9 +42,9 @@ export default function Home() {
         <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse' }}>
           <thead>
             <tr>
-              <th>유저</th>
-              <th>스코어</th>
-              <th>업데이트</th>
+              <th>Name</th>
+              <th>Score</th>
+              <th>Update Date</th>
             </tr>
           </thead>
           <tbody>
