@@ -5,11 +5,8 @@ services:
       - "80:3000"
     environment:
       - PORT=3000
-      - JWT_SECRET=CHANGE_ME_TO_LONG_RANDOM_STRING
+      - JWT_SECRET="dc82ff369e0ecfd73283747a579c116d29721ce361ba2ebbd14303912f519f30"
       - DATABASE_URL=file:/data/prod.db
     volumes:
-      - worldcup_data:/data
+      - ./data:/data
     restart: unless-stopped
-
-volumes:
-  worldcup_data:

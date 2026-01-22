@@ -25,5 +25,7 @@ Thumbs.db
 *.db
 *.db-journal
 
+data/
+
 # prisma studio 등
 prisma/*.db

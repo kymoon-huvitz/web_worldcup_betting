@@ -142,7 +142,7 @@ npx prisma studio
 
 ### 개요
 - **목표**: 컨테이너 1개에서 **Backend(Express)** 가 **Frontend 빌드 결과(dist)** 를 같이 서빙
-- **DB**: SQLite 파일은 **Docker Volume** 으로 보존(컨테이너 재생성해도 데이터 유지)
+- **DB**: SQLite 파일은 **호스트 폴더(바인드 마운트 `./data`)** 에 저장해 보존(컨테이너 재생성/도커 재설치에도 데이터 유지)
 - **Windows에서도 가능**: Docker Desktop + WSL2 사용 시 **Linux 컨테이너** 실행 가능
 
 > 접속은 도커 “내부 IP”가 아니라, **호스트(PC/서버) IP:PORT** 로 합니다.  
@@ -210,12 +210,17 @@ services:
       - JWT_SECRET=CHANGE_ME_TO_LONG_RANDOM_STRING
       - DATABASE_URL=file:/data/prod.db
     volumes:
-      - worldcup_data:/data
+      - ./data:/data
     restart: unless-stopped
-
-volumes:
-  worldcup_data:
 ```
+
+✅ (중요) DB 파일 위치
+- 컨테이너 안의 `/data/prod.db` 는 **호스트의 `./data/prod.db`** 로 저장됩니다.
+- 처음 1회 `data/` 폴더를 만들어 두세요:
+```bash
+mkdir data
+```
+- `*.db` 는 이미 `.gitignore`에서 제외되어 있으니(커밋되지 않음) 안심하고 써도 됩니다.
 
 - 동료들이 `:3000`을 치기 불편하면 아래처럼 바꿀 수 있음(80 포트 충돌 주의):
 ```yaml
@@ -243,7 +248,8 @@ docker compose exec worldcup sh -c "cd /app/backend && npx prisma migrate deploy
 
 ### 6) 접속 확인
 - 내 PC: `http://localhost:3000`
-- 같은 LAN 다른 PC: `http://<내부IP>:3000` (예: `http://172.20.x.x:3000`)
+- 같은 LAN 다른 PC: `http://<내부IP>:3000` (예: `http://192.168.0.10:3000`)
+  - ※ `172.20.x.x` 같은 주소는 보통 **도커 내부 네트워크 IP**라서, 접속 주소로는 비추천입니다.
 - API: `http://<호스트>:3000/api/predictions`
 
 ---
@@ -258,7 +264,7 @@ docker compose exec worldcup sh -c "cd /app/backend && npx prisma migrate deploy
 docker compose up -d --build
 ```
 - `--build`가 새 이미지로 다시 만들어서 컨테이너를 교체합니다.
-- DB는 `worldcup_data` 볼륨에 남아있어 **데이터는 유지**됩니다.
+- DB는 호스트의 `./data/` 폴더에 남아있어 **데이터는 유지**됩니다.
 
 #### B) Prisma 스키마 변경(테이블/컬럼 변경)
 1) 개발 PC에서:
