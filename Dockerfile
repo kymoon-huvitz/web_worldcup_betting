@@ -1,4 +1,4 @@
-# ---------- build frontend ----------
+# ---------- build frontend -----------
 FROM node:20-alpine AS frontend_builder
 WORKDIR /app/frontend
 
