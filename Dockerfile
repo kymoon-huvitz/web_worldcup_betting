@@ -25,6 +25,9 @@ COPY backend/ ./
 # prisma generate (client 생성)
 RUN npx prisma generate
 
+# backend build (typescript)
+RUN npm run build
+
 
 # ---------- runtime ----------
 FROM node:20-alpine AS runtime
@@ -33,7 +36,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # backend runtime files
-COPY --from=backend_builder /app/backend /app/backend
+COPY --from=backend_builder /app/backend/dist ./backend/dist
+COPY --from=backend_builder /app/backend/prisma ./backend/prisma
+COPY --from=backend_builder /app/backend/package*.json ./backend/
 
 # frontend dist into frontend folder so backend can serve it
 COPY --from=frontend_builder /app/frontend/dist /app/frontend/dist
@@ -44,4 +49,4 @@ COPY --from=backend_builder /app/backend/node_modules /app/backend/node_modules
 EXPOSE 3000
 
 # backend 실행
-CMD ["node", "backend/index.js"]
+CMD ["node", "backend/dist/index.js"]

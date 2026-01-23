@@ -1,6 +1,6 @@
 # Web Worldcup Betting
 
-프론트엔드(React + Vite)와 백엔드(Express + Prisma + SQLite)를 하나의 저장소(monorepo)로 관리하는 프로젝트입니다.
+프론트엔드(React + Vite)와 백엔드(TypeScript + Express + Prisma + SQLite)를 하나의 저장소(monorepo)로 관리하는 프로젝트입니다.
 
 ---
 
@@ -17,7 +17,7 @@ web_worldcup_betting/
 
 ## 🧩 기술 스택
 - **Frontend**: React, Vite
-- **Backend**: Node.js, Express
+- **Backend**: Node.js, Express, TypeScript
 - **Auth**: JWT
 - **DB**: SQLite
 - **ORM**: Prisma
@@ -83,8 +83,11 @@ npx prisma migrate dev
 
 #### 3-3) 백엔드 실행
 ```bash
-node index.js
+npm run dev
 ```
+
+- 내부적으로 tsx watch src/index.ts 실행
+- 파일 변경 시 자동 재시작
 
 API 테스트:
 - http://localhost:3000/api/predictions
@@ -115,8 +118,12 @@ npm run build
 ### 2) 백엔드 실행 (정적 파일 서빙)
 ```bash
 cd ../backend
-node index.js
+npm run build
+npm run start
 ```
+
+- tsc → backend/dist/index.js 생성
+- Express가 frontend/dist를 정적 파일로 서빙
 
 접속:
 - http://localhost:3000/
@@ -159,6 +166,7 @@ npx prisma studio
 **/.env
 **/*.db
 frontend/dist
+backend/dist
 .git
 ```
 
@@ -183,14 +191,17 @@ COPY backend/package*.json ./
 RUN npm ci
 COPY backend/ ./
 RUN npx prisma generate
+RUN npm run build
 
 FROM node:20-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
+
 COPY --from=backend_builder /app/backend /app/backend
 COPY --from=frontend_builder /app/frontend/dist /app/frontend/dist
+
 EXPOSE 3000
-CMD ["node", "backend/index.js"]
+CMD ["node", "backend/dist/index.js"]
 ```
 
 ---

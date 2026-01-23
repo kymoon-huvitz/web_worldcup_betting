@@ -2,6 +2,7 @@
 **/.env
 **/*.db
 frontend/dist
+backend/dist
 .git
 .gitignore
 README.md
