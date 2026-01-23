@@ -327,7 +327,7 @@ cd backend
 npm install
 # .env 생성
 npx prisma migrate dev
-node index.js
+npm run dev
 
 cd ../frontend
 npm install
