@@ -304,7 +304,7 @@ docker compose restart worldcup
 ```
 
 > 참고: 개발 중에는 매번 Docker로 돌리기보다,  
-> `frontend: npm run dev` + `backend: node index.js` 방식이 더 빠릅니다.  
+> `frontend: npm run dev` + `backend: npm run dev` 방식이 더 빠릅니다.  
 > Docker는 “동료에게 보여주는 버전/배포 버전”을 만들 때 쓰는 것이 일반적입니다.
 
 ---
