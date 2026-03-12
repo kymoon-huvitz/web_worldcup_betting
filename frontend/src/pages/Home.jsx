@@ -104,6 +104,35 @@ export default function Home() {
     }
   }
 
+  async function deleteMyPrediction() {
+    if (!window.confirm('정말로 참여를 취소하고 예측 스코어를 삭제하시겠습니까?')) return
+    
+    setMyMsg('')
+    setMyError('')
+    try {
+      const res = await fetch('/api/predictions/me', {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("서버 응답이 올바르지 않습니다. (백엔드 서버 상태를 확인해주세요)");
+      }
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || '삭제 요청 처리에 실패했습니다.')
+
+      setMyMsg('삭제되었습니다.')
+      setHomeScore(0)
+      setAwayScore(0)
+      load() // Refresh lists and stats
+      setTimeout(() => setMyMsg(''), 2000)
+    } catch (e) {
+      setMyError(e.message || '삭제 중 오류가 발생했습니다.')
+    }
+  }
+
   useEffect(() => {
     load()
     if (token) {
@@ -262,6 +291,24 @@ export default function Home() {
 
                 {!isExpired && !token && <p style={{ marginTop: '1rem', marginBottom: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>로그인하면 당신의 예측이 목록에 등록됩니다!</p>}
                 {isExpired && <p style={{ marginTop: '1rem', marginBottom: 0, fontSize: '0.9rem', color: '#ff4d4d', fontWeight: 700 }}>경기 시작 10분 전으로 예측이 마감되었습니다.</p>}
+                
+                {token && !isExpired && (
+                  <button 
+                    onClick={deleteMyPrediction}
+                    style={{ 
+                      marginTop: '1rem', 
+                      backgroundColor: 'transparent', 
+                      border: '1px solid rgba(255, 77, 77, 0.5)', 
+                      color: '#ff4d4d',
+                      fontSize: '0.85rem',
+                      padding: '0.5rem',
+                      boxShadow: 'none'
+                    }}
+                  >
+                    내 예측 삭제 (참여 취소)
+                  </button>
+                )}
+
                 {myMsg && <p className="status-msg" style={{ color: '#38a169' }}>{myMsg}</p>}
                 {myError && <p className="status-msg" style={{ color: '#e53e3e' }}>{myError}</p>}
               </>

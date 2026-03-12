@@ -2,12 +2,13 @@ import { BrowserRouter, Routes, Route, Link, Navigate, useNavigate } from 'react
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
-import { getToken, clearToken } from './auth'
+import { getToken, clearToken, getUserInfo } from './auth'
 import './App.css'
 
 function NavBar() {
   const navigate = useNavigate()
   const token = getToken()
+  const user = getUserInfo()
 
   return (
     <div className="navbar">
@@ -20,14 +21,17 @@ function NavBar() {
             <Link to="/signup">회원가입</Link>
           </>
         ) : (
-          <button
-            onClick={() => {
-              clearToken()
-              window.location.href = '/'
-            }}
-          >
-            로그아웃
-          </button>
+          <>
+            {user && <span className="user-welcome">{user.name} 님</span>}
+            <button
+              onClick={() => {
+                clearToken()
+                window.location.href = '/'
+              }}
+            >
+              로그아웃
+            </button>
+          </>
         )}
       </div>
     </div>

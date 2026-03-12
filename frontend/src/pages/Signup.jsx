@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { setToken } from '../auth'
+import { setToken, setUserInfo } from '../auth'
 
 export default function Signup() {
   const nav = useNavigate()
@@ -28,6 +28,7 @@ export default function Signup() {
       if (!res.ok) throw new Error(data?.error || 'Signup failed')
 
       setToken(data.token)
+      setUserInfo(data.user)
       nav('/')
     } catch (e) {
       setError(e.message || '회원가입 실패')
@@ -51,7 +52,7 @@ export default function Signup() {
             ※ 반드시 본인의 <b>실명</b>을 입력해주세요.
           </p>
           <p style={{ fontSize: '0.8rem', color: '#ff4d4d', fontWeight: '700', margin: '2px 0 0 4px' }}>
-            실명과 다를 경우 상금 지급이 불가능하며, 이 경우에는 서버 관리자가 전부 상금을 몰수할 수 있습니다.
+            실명과 다를 경우 상금 지급이 불가능하며, 이 경우에는 서버 관리자가 전부 상금을 가져가게 됩니다.
           </p>
         </div>
         <input placeholder="이메일" value={email} onChange={(e) => setEmail(e.target.value)} />

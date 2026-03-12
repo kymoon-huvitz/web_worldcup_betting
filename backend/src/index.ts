@@ -155,6 +155,20 @@ app.get('/api/predictions/me', auth, async (req: AuthRequest, res: Response) => 
   }
 });
 
+// 내 예측 삭제
+app.delete('/api/predictions/me', auth, async (req: AuthRequest, res: Response) => {
+  try {
+    // deleteMany won't throw error if record not found
+    await prisma.prediction.deleteMany({
+      where: { userId: req.userId },
+    });
+    res.json({ message: 'Prediction deleted' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Delete prediction failed' });
+  }
+});
+
 /**
  * ---------- frontend static serving (production-like) ----------
  * 먼저 프론트를 빌드해야 함: (frontend) npm run build

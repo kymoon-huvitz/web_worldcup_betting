@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { setToken } from '../auth'
+import { setToken, setUserInfo } from '../auth'
 
 export default function Login() {
   const nav = useNavigate()
@@ -23,6 +23,7 @@ export default function Login() {
       if (!res.ok) throw new Error(data?.error || 'Login failed')
 
       setToken(data.token)
+      setUserInfo(data.user)
       nav('/')
     } catch (e) {
       setError(e.message || '로그인 실패')
