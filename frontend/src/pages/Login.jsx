@@ -23,7 +23,7 @@ export default function Login() {
       if (!res.ok) throw new Error(data?.error || 'Login failed')
 
       setToken(data.token)
-      nav('/myprediction')
+      nav('/')
     } catch (e) {
       setError(e.message || '로그인 실패')
     } finally {
@@ -32,9 +32,9 @@ export default function Login() {
   }
 
   return (
-    <div style={{ maxWidth: 360 }}>
+    <div className="auth-form-container">
       <h2>로그인</h2>
-      <form onSubmit={onSubmit} style={{ display: 'grid', gap: 8 }}>
+      <form onSubmit={onSubmit} className="auth-form">
         <input placeholder="이메일" value={email} onChange={(e) => setEmail(e.target.value)} />
         <input
           placeholder="비밀번호"
@@ -44,7 +44,7 @@ export default function Login() {
         />
         <button disabled={loading}>{loading ? '처리 중...' : '로그인'}</button>
       </form>
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
+      {error && <p className="status-msg" style={{ color: '#e53e3e' }}>{error}</p>}
     </div>
   )
 }

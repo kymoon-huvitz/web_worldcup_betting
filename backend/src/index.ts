@@ -44,14 +44,19 @@ function auth(req: AuthRequest, res: Response, next: NextFunction) {
 app.post('/api/auth/signup', async (req: Request, res: Response) => {
   try {
     const { email, password, name } = req.body;
-    if (!email || !password) return res.status(400).json({ error: 'email and password are required' });
+    if (!email || !password || !name) {
+      return res.status(400).json({ error: 'Email, password, and name are required' });
+    }
 
-    const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing) return res.status(409).json({ error: 'Email already exists' });
+    const existingEmail = await prisma.user.findUnique({ where: { email } });
+    if (existingEmail) return res.status(409).json({ error: '이미 사용 중인 이메일입니다.' });
+
+    const existingName = await prisma.user.findUnique({ where: { name } });
+    if (existingName) return res.status(409).json({ error: '이미 사용 중인 이름입니다.' });
 
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
-      data: { email, passwordHash, name: name || null },
+      data: { email, passwordHash, name },
       select: { id: true, email: true, name: true, createdAt: true },
     });
 

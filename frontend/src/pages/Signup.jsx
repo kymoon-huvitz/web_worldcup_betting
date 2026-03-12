@@ -13,6 +13,10 @@ export default function Signup() {
   async function onSubmit(e) {
     e.preventDefault()
     setError('')
+    if (!name.trim()) {
+      setError('이름을 입력해주세요.')
+      return
+    }
     setLoading(true)
     try {
       const res = await fetch('/api/auth/signup', {
@@ -24,7 +28,7 @@ export default function Signup() {
       if (!res.ok) throw new Error(data?.error || 'Signup failed')
 
       setToken(data.token)
-      nav('/myprediction')
+      nav('/')
     } catch (e) {
       setError(e.message || '회원가입 실패')
     } finally {
@@ -33,10 +37,23 @@ export default function Signup() {
   }
 
   return (
-    <div style={{ maxWidth: 360 }}>
+    <div className="auth-form-container">
       <h2>회원가입</h2>
-      <form onSubmit={onSubmit} style={{ display: 'grid', gap: 8 }}>
-        <input placeholder="이름(선택)" value={name} onChange={(e) => setName(e.target.value)} />
+      <form onSubmit={onSubmit} className="auth-form">
+        <div style={{ textAlign: 'left' }}>
+          <input 
+            placeholder="이름 (실명 입력)" 
+            value={name} 
+            onChange={(e) => setName(e.target.value)} 
+            style={{ width: '100%', boxSizing: 'border-box' }}
+          />
+          <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)', margin: '4px 0 0 4px' }}>
+            ※ 반드시 본인의 <b>실명</b>을 입력해주세요.
+          </p>
+          <p style={{ fontSize: '0.8rem', color: '#ff4d4d', fontWeight: '700', margin: '2px 0 0 4px' }}>
+            실명과 다를 경우 상금 지급이 불가능합니다.
+          </p>
+        </div>
         <input placeholder="이메일" value={email} onChange={(e) => setEmail(e.target.value)} />
         <input
           placeholder="비밀번호"
@@ -46,7 +63,7 @@ export default function Signup() {
         />
         <button disabled={loading}>{loading ? '처리 중...' : '가입하기'}</button>
       </form>
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
+      {error && <p className="status-msg" style={{ color: '#e53e3e' }}>{error}</p>}
     </div>
   )
 }

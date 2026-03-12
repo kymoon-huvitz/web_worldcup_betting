@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Link, Navigate, useNavigate } from 'react
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
-import MyPrediction from './pages/MyPrediction'
 import { getToken, clearToken } from './auth'
 import './App.css'
 
@@ -12,9 +11,6 @@ function NavBar() {
 
   return (
     <div className="navbar">
-      <Link to="/">메인</Link>
-      <Link to="/myprediction">내 스코어 등록</Link>
-
       <div className="navbar-right">
         {!token ? (
           <>
@@ -25,7 +21,7 @@ function NavBar() {
           <button
             onClick={() => {
               clearToken()
-              navigate('/')
+              window.location.href = '/'
             }}
           >
             로그아웃
@@ -51,14 +47,6 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route
-            path="/myprediction"
-            element={
-              <RequireAuth>
-                <MyPrediction />
-              </RequireAuth>
-            }
-          />
         </Routes>
       </div>
     </BrowserRouter>
