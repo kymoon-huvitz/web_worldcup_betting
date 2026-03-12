@@ -11,6 +11,8 @@ function NavBar() {
 
   return (
     <div className="navbar">
+      <Link to="/" className="nav-logo">HOME</Link>
+      
       <div className="navbar-right">
         {!token ? (
           <>

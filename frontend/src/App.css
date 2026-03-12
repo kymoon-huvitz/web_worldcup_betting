@@ -1,13 +1,28 @@
 .navbar {
   display: flex;
   align-items: center;
-  padding: 1.2rem 2rem;
-  background-color: rgba(10, 14, 20, 0.8);
+  padding: 1rem 2rem;
+  background-color: rgba(10, 14, 20, 0.85);
   backdrop-filter: blur(15px);
   border-bottom: 1px solid rgba(255, 215, 0, 0.2);
   position: sticky;
   top: 0;
   z-index: 100;
+  justify-content: space-between; /* Space between Logo and Right items */
+}
+
+.nav-logo {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #ffd700 !important;
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.nav-logo:hover {
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+  transform: scale(1.05);
 }
 
 .navbar-right {
