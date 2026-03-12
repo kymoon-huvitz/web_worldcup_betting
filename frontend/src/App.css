@@ -40,16 +40,16 @@
 
 /* Adjustments for the new layout */
 .score-card {
-  background: rgba(0, 0, 0, 0.75); /* Darker for better separation */
+  background: rgba(0, 0, 0, 0.58); /* Further lightened */
   padding: 1.5rem;
   border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.15); /* Slightly brighter border */
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(25px);
 }
 
 .prize-pool-card {
-  background: rgba(0, 0, 0, 0.75); /* Matching dark theme */
+  background: rgba(0, 0, 0, 0.58); /* Matching adjustment */
   border: 1px solid rgba(255, 215, 0, 0.2);
   border-radius: 20px;
   padding: 1.5rem;
@@ -58,7 +58,7 @@
   align-items: center;
   gap: 0.5rem;
   backdrop-filter: blur(20px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .prize-pool-amount span {
@@ -70,12 +70,12 @@
 
 /* Leaderboard Content */
 .leaderboard-section {
-  background: rgba(0, 0, 0, 0.75); /* Deep dark background */
+  background: rgba(0, 0, 0, 0.58); /* Further lightened */
   backdrop-filter: blur(25px);
   border-radius: 24px;
   padding: 2.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.15); /* Slightly brighter border */
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
 }
 
 .section-title h2 {
