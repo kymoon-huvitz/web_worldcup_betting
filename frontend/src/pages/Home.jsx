@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react'
-import { MATCH } from '../constants'
+import { MATCHES } from '../constants'
 import { getToken } from '../auth'
 
 export default function Home() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+
+  // Multi-match state
+  const [currentMatchIndex, setCurrentMatchIndex] = useState(0)
+  const currentMatch = MATCHES[currentMatchIndex]
 
   // My prediction states
   const [homeScore, setHomeScore] = useState(0)
@@ -20,7 +24,7 @@ export default function Home() {
   const [isExpired, setIsExpired] = useState(false)
 
   useEffect(() => {
-    const deadline = new Date(MATCH.matchStartTime).getTime() - 10 * 60 * 1000 // 10 mins before
+    const deadline = new Date(currentMatch.matchStartTime).getTime() - 10 * 60 * 1000
 
     const timer = setInterval(() => {
       const now = new Date().getTime()
@@ -36,17 +40,18 @@ export default function Home() {
         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
         const seconds = Math.floor((distance % (1000 * 60)) / 1000)
         setTimeLeft(`${days}일 ${hours}시간 ${minutes}분 ${seconds}초 남음`)
+        setIsExpired(false)
       }
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [])
+  }, [currentMatch])
 
   async function load() {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch('/api/predictions')
+      const res = await fetch(`/api/predictions?matchId=${currentMatch.id}`)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       setRows(await res.json())
     } catch {
@@ -61,15 +66,22 @@ export default function Home() {
     setMyLoading(true)
     setMyError('')
     try {
-      const res = await fetch('/api/predictions/me', {
+      const res = await fetch(`/api/predictions/me?matchId=${currentMatch.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("서버 응답 오류");
+      }
       const data = await res.json()
       if (!res.ok) throw new Error(data?.error || 'Load failed')
 
       if (data) {
         setHomeScore(data.homeScore)
         setAwayScore(data.awayScore)
+      } else {
+        setHomeScore(0)
+        setAwayScore(0)
       }
     } catch (e) {
       setMyError(e.message || '불러오기 실패')
@@ -89,6 +101,7 @@ export default function Home() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
+          matchId: currentMatch.id,
           homeScore: Number(homeScore),
           awayScore: Number(awayScore),
         }),
@@ -97,7 +110,7 @@ export default function Home() {
       if (!res.ok) throw new Error(data?.error || 'Save failed')
 
       setMyMsg('저장 완료!')
-      load() // Refresh the main list
+      load() 
       setTimeout(() => setMyMsg(''), 2000)
     } catch (e) {
       setMyError(e.message || '저장 실패')
@@ -110,14 +123,14 @@ export default function Home() {
     setMyMsg('')
     setMyError('')
     try {
-      const res = await fetch('/api/predictions/me', {
+      const res = await fetch(`/api/predictions/me?matchId=${currentMatch.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })
       
       const contentType = res.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("서버 응답이 올바르지 않습니다. (백엔드 서버 상태를 확인해주세요)");
+        throw new Error("서버 응답이 올바르지 않습니다.");
       }
 
       const data = await res.json()
@@ -126,7 +139,7 @@ export default function Home() {
       setMyMsg('삭제되었습니다.')
       setHomeScore(0)
       setAwayScore(0)
-      load() // Refresh lists and stats
+      load() 
       setTimeout(() => setMyMsg(''), 2000)
     } catch (e) {
       setMyError(e.message || '삭제 중 오류가 발생했습니다.')
@@ -138,42 +151,57 @@ export default function Home() {
     if (token) {
       loadMyPrediction()
     }
-  }, [token])
+  }, [token, currentMatchIndex])
+
+  const nextMatch = () => setCurrentMatchIndex((prev) => (prev + 1) % MATCHES.length)
+  const prevMatch = () => setCurrentMatchIndex((prev) => (prev - 1 + MATCHES.length) % MATCHES.length)
 
   return (
     <div className="home-content">
       {/* Slim Match Bar at the Top */}
       <div className="match-bar">
+        {currentMatchIndex > 0 ? (
+          <button className="match-nav-btn prev" onClick={prevMatch}>&lt;</button>
+        ) : (
+          <div style={{ width: 45 }}></div> /* Placeholder to maintain center alignment */
+        )}
+        
         <div className="match-bar-info">
-          <div className="match-bar-tournament">{MATCH.tournament}</div>
+          <div className="match-bar-tournament">{currentMatch.tournament}</div>
           <div className="match-bar-teams">
             <div className="match-bar-team">
-              <img src={MATCH.homeFlag} alt="" className="match-bar-flag" />
-              <span>{MATCH.home}</span>
+              <img src={currentMatch.homeFlag} alt="" className="match-bar-flag" />
+              <span>{currentMatch.home}</span>
             </div>
             <div className="match-bar-vs">VS</div>
             <div className="match-bar-team">
-              <img src={MATCH.awayFlag} alt="" className="match-bar-flag" />
-              <span>{MATCH.away}</span>
+              <img src={currentMatch.awayFlag} alt="" className="match-bar-flag" />
+              <span>{currentMatch.away}</span>
             </div>
           </div>
         </div>
         
         <div className="match-bar-details">
-          <div>{MATCH.date}</div>
-          <div style={{ opacity: 0.8 }}>{MATCH.stadium}</div>
+          <div>{currentMatch.date}</div>
+          <div style={{ opacity: 0.8 }}>{currentMatch.stadium}</div>
         </div>
+
+        {currentMatchIndex < MATCHES.length - 1 ? (
+          <button className="match-nav-btn next" onClick={nextMatch}>&gt;</button>
+        ) : (
+          <div style={{ width: 45 }}></div> /* Placeholder to maintain center alignment */
+        )}
       </div>
 
       <div className="home-grid">
         {/* Left Main: Title & Leaderboard */}
-        <div className="right-main"> {/* Using existing class but positioned on the left */}
+        <div className="right-main">
           <h1>Who will be the lucky winner?</h1>
           
           <div className="leaderboard-section">
             <div className="section-header">
               <div className="section-title">
-                <h2>전체 예측 목록</h2>
+                <h2>{currentMatch.label} 예측 목록</h2>
                 <p>실시간 참가자 예측 현황</p>
               </div>
               <button onClick={load} className="refresh-btn">
@@ -193,7 +221,7 @@ export default function Home() {
                   <thead>
                     <tr>
                       <th>참가자</th>
-                      <th style={{ textAlign: 'center' }}>예측 스코어 ({MATCH.home} : {MATCH.away})</th>
+                      <th style={{ textAlign: 'center' }}>예측 스코어 ({currentMatch.home} : {currentMatch.away})</th>
                       <th style={{ textAlign: 'right' }}>수정일</th>
                     </tr>
                   </thead>
@@ -223,7 +251,7 @@ export default function Home() {
         </div>
 
         {/* Right Sidebar: Score Input & Prize Info */}
-        <div className="left-sidebar"> {/* Using existing class but positioned on the right */}
+        <div className="left-sidebar">
           <div className="score-card">
             <h3>내 예측 스코어</h3>
             {myLoading ? (
@@ -234,8 +262,8 @@ export default function Home() {
                   <div className="score-inputs-row">
                     <div className="score-input-wrapper">
                       <div className="score-input-label">
-                        <img src={MATCH.homeFlag} alt="" className="score-input-flag" />
-                        <span>{MATCH.home}</span>
+                        <img src={currentMatch.homeFlag} alt="" className="score-input-flag" />
+                        <span>{currentMatch.home}</span>
                       </div>
                       <input
                         type="number"
@@ -251,8 +279,8 @@ export default function Home() {
 
                       <div className="score-input-wrapper">
                       <div className="score-input-label">
-                        <img src={MATCH.awayFlag} alt="" className="score-input-flag" />
-                        <span>{MATCH.away}</span>
+                        <img src={currentMatch.awayFlag} alt="" className="score-input-flag" />
+                        <span>{currentMatch.away}</span>
                       </div>
                       <input
                         type="number"
@@ -267,12 +295,34 @@ export default function Home() {
                   </div>
                   
                   {token ? (
-                    <button 
-                      onClick={save} 
-                      disabled={isExpired}
-                    >
-                      {isExpired ? '마감됨' : '스코어 등록'}
-                    </button>
+                    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                      <button 
+                        onClick={save} 
+                        disabled={isExpired}
+                      >
+                        {isExpired ? '등록 마감' : '스코어 등록'}
+                      </button>
+                      
+                      {token && (
+                        <button 
+                          onClick={deleteMyPrediction}
+                          disabled={isExpired}
+                          className="delete-btn"
+                          style={{ 
+                            backgroundColor: 'transparent', 
+                            border: isExpired ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(255, 77, 77, 0.4)', 
+                            color: isExpired ? 'rgba(255, 255, 255, 0.3)' : '#ff4d4d',
+                            fontSize: '0.85rem',
+                            padding: '0.6rem',
+                            boxShadow: 'none',
+                            marginTop: '0',
+                            cursor: isExpired ? 'not-allowed' : 'pointer'
+                          }}
+                        >
+                          {isExpired ? '취소 불가' : '내 예측 삭제 (참여 취소)'}
+                        </button>
+                      )}
+                    </div>
                   ) : (
                     <button 
                       onClick={() => window.location.href = '/login'} 
@@ -288,26 +338,13 @@ export default function Home() {
                   <div className="timer-label">{isExpired ? '접수 마감' : '예측 마감까지'}</div>
                   <div className="timer-value">{timeLeft}</div>
                 </div>
+                
+                <p style={{ marginTop: '0.8rem', marginBottom: 0, fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: '1.4' }}>
+                  ※ 마감 이후에는 예측 스코어 등록 및 취소가 불가합니다.
+                </p>
 
                 {!isExpired && !token && <p style={{ marginTop: '1rem', marginBottom: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>로그인하면 당신의 예측이 목록에 등록됩니다!</p>}
                 {isExpired && <p style={{ marginTop: '1rem', marginBottom: 0, fontSize: '0.9rem', color: '#ff4d4d', fontWeight: 700 }}>경기 시작 10분 전으로 예측이 마감되었습니다.</p>}
-                
-                {token && !isExpired && (
-                  <button 
-                    onClick={deleteMyPrediction}
-                    style={{ 
-                      marginTop: '1rem', 
-                      backgroundColor: 'transparent', 
-                      border: '1px solid rgba(255, 77, 77, 0.5)', 
-                      color: '#ff4d4d',
-                      fontSize: '0.85rem',
-                      padding: '0.5rem',
-                      boxShadow: 'none'
-                    }}
-                  >
-                    내 예측 삭제 (참여 취소)
-                  </button>
-                )}
 
                 {myMsg && <p className="status-msg" style={{ color: '#38a169' }}>{myMsg}</p>}
                 {myError && <p className="status-msg" style={{ color: '#e53e3e' }}>{myError}</p>}

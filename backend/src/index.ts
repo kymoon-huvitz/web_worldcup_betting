@@ -91,10 +91,11 @@ app.post('/api/auth/login', async (req: Request, res: Response) => {
   }
 });
 
-// 예측 등록/수정 (유저당 1개, upsert)
+// 예측 등록/수정 (유저당 경기별 1개, upsert)
 app.post('/api/predictions', auth, async (req: AuthRequest, res: Response) => {
   try {
-    const { homeScore, awayScore } = req.body;
+    const { homeScore, awayScore, matchId } = req.body;
+    if (!matchId) return res.status(400).json({ error: 'matchId is required' });
     if (homeScore === undefined || awayScore === undefined) {
       return res.status(400).json({ error: 'homeScore and awayScore are required' });
     }
@@ -106,9 +107,9 @@ app.post('/api/predictions', auth, async (req: AuthRequest, res: Response) => {
     }
 
     const prediction = await prisma.prediction.upsert({
-      where: { userId: req.userId },
+      where: { userId_matchId: { userId: req.userId!, matchId } },
       update: { homeScore, awayScore },
-      create: { userId: req.userId!, homeScore, awayScore },
+      create: { userId: req.userId!, matchId, homeScore, awayScore },
     });
 
     res.json(prediction);
@@ -118,15 +119,19 @@ app.post('/api/predictions', auth, async (req: AuthRequest, res: Response) => {
   }
 });
 
-// 메인: 모든 유저 예측 목록
+// 메인: 특정 경기의 모든 유저 예측 목록
 app.get('/api/predictions', async (req: Request, res: Response) => {
   try {
+    const { matchId } = req.query;
+    if (!matchId) return res.status(400).json({ error: 'matchId is required' });
+
     const list = await prisma.prediction.findMany({
+      where: { matchId: String(matchId) },
       orderBy: { updatedAt: 'desc' },
       include: { user: { select: { id: true, email: true, name: true } } },
     });
 
-    const result = list.map((p: (Prisma.PredictionGetPayload<{include: {user: {select: {id: true, email: true, name: true}}}}>)) => ({
+    const result = list.map((p: any) => ({
       userId: p.user.id,
       name: p.user.name || p.user.email,
       email: p.user.email,
@@ -142,11 +147,14 @@ app.get('/api/predictions', async (req: Request, res: Response) => {
   }
 });
 
-// 내 예측 조회
+// 특정 경기의 내 예측 조회
 app.get('/api/predictions/me', auth, async (req: AuthRequest, res: Response) => {
   try {
+    const { matchId } = req.query;
+    if (!matchId) return res.status(400).json({ error: 'matchId is required' });
+
     const p = await prisma.prediction.findUnique({
-      where: { userId: req.userId },
+      where: { userId_matchId: { userId: req.userId!, matchId: String(matchId) } },
     });
     res.json(p);
   } catch (e) {
@@ -155,12 +163,14 @@ app.get('/api/predictions/me', auth, async (req: AuthRequest, res: Response) => 
   }
 });
 
-// 내 예측 삭제
+// 특정 경기의 내 예측 삭제
 app.delete('/api/predictions/me', auth, async (req: AuthRequest, res: Response) => {
   try {
-    // deleteMany won't throw error if record not found
+    const { matchId } = req.query;
+    if (!matchId) return res.status(400).json({ error: 'matchId is required' });
+
     await prisma.prediction.deleteMany({
-      where: { userId: req.userId },
+      where: { userId: req.userId, matchId: String(matchId) },
     });
     res.json({ message: 'Prediction deleted' });
   } catch (e) {
