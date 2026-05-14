@@ -173,7 +173,15 @@ export default function Home() {
               <img src={currentMatch.homeFlag} alt="" className="match-bar-flag" />
               <span>{currentMatch.home}</span>
             </div>
-            <div className="match-bar-vs">VS</div>
+            <div className="match-bar-result">
+              {currentMatch.actualHomeScore !== undefined && (
+                <span className="actual-score home">{currentMatch.actualHomeScore}</span>
+              )}
+              <div className="match-bar-vs">VS</div>
+              {currentMatch.actualAwayScore !== undefined && (
+                <span className="actual-score away">{currentMatch.actualAwayScore}</span>
+              )}
+            </div>
             <div className="match-bar-team">
               <img src={currentMatch.awayFlag} alt="" className="match-bar-flag" />
               <span>{currentMatch.away}</span>
@@ -196,13 +204,27 @@ export default function Home() {
       <div className="home-grid">
         {/* Left Main: Title & Leaderboard */}
         <div className="right-main">
-          <h1>Who will be the lucky winner?</h1>
-          
+
           <div className="leaderboard-section">
             <div className="section-header">
               <div className="section-title">
                 <h2>{currentMatch.label} 예측 목록</h2>
-                <p>실시간 참가자 예측 현황</p>
+                <div className="prize-info-row">
+                  <div className="prize-item">
+                    <span className="label">참가비</span>
+                    <span className="value">10,000원</span>
+                  </div>
+                  <div className="prize-item highlight">
+                    <span className="label">총 상금</span>
+                    <span className="value">{(rows.length * 10000).toLocaleString()}원</span>
+                  </div>
+                  <div className="prize-item">
+                    <span className="label">참여자</span>
+                    <span className="value">{rows.length}명</span>
+                  </div>
+                </div>
+                <p className="prize-disclaimer">※ 승자 독식</p>
+                <p className="prize-disclaimer">※ 당첨자가 여러 명일 경우 상금은 1/n로 지급됩니다.</p>
               </div>
               <button onClick={load} className="refresh-btn">
                 새로고침
@@ -226,23 +248,29 @@ export default function Home() {
                     </tr>
                   </thead>
                   <tbody>
-                    {rows.map((r, index) => (
-                      <tr key={r.userId}>
-                        <td>
-                          <div className="user-name-cell">
-                            <span>{r.name}</span>
-                          </div>
-                        </td>
-                        <td style={{ textAlign: 'center' }}>
-                          <div className={`score-display ${index < 3 ? 'highlight' : ''}`}>
-                            {r.homeScore} : {r.awayScore}
-                          </div>
-                        </td>
-                        <td style={{ textAlign: 'right', color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>
-                          {new Date(r.updatedAt).toLocaleDateString()} {new Date(r.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </td>
-                      </tr>
-                    ))}
+                    {rows.map((r, index) => {
+                      const isCorrect = currentMatch.actualHomeScore !== undefined && 
+                                      r.homeScore === currentMatch.actualHomeScore && 
+                                      r.awayScore === currentMatch.actualAwayScore;
+                      return (
+                        <tr key={r.userId} className={isCorrect ? 'correct-prediction-row' : ''}>
+                          <td>
+                            <div className="user-name-cell">
+                              <span>{r.name}</span>
+                              {isCorrect && <span className="correct-badge">🏆 당첨!</span>}
+                            </div>
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            <div className="score-display">
+                              {r.homeScore} : {r.awayScore}
+                            </div>
+                          </td>
+                          <td style={{ textAlign: 'right', color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>
+                            {new Date(r.updatedAt).toLocaleDateString()} {new Date(r.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -350,15 +378,6 @@ export default function Home() {
                 {myError && <p className="status-msg" style={{ color: '#e53e3e' }}>{myError}</p>}
               </>
             )}
-          </div>
-
-          <div className="prize-pool-card">
-            <div className="prize-pool-label">참가비: 10,000원</div>
-            <div className="prize-pool-amount">
-              총 상금: <span>{(rows.length * 10000).toLocaleString()}</span> 원
-            </div>
-            <div className="prize-pool-disclaimer">※ 스코어를 맞힌 당첨자가 여러 명일 경우 상금은 1/n로 지급됩니다.</div>
-            <div className="prize-pool-stats">현재 {rows.length}명 참여 중</div>
           </div>
         </div>
       </div>

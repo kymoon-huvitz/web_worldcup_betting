@@ -52,7 +52,7 @@ export default function Signup() {
             ※ 반드시 본인의 <b>실명</b>을 입력해주세요.
           </p>
           <p style={{ fontSize: '0.8rem', color: '#ff4d4d', fontWeight: '700', margin: '2px 0 0 4px' }}>
-            실명과 다를 경우 상금 지급이 불가능하며, 이 경우에는 서버 관리자가 전부 상금을 가져가게 됩니다.
+            실명과 다를 경우 상금 지급이 불가능하며, 이 경우에는 모든 상금을 서버 관리자가 갖게 됩니다.
           </p>
         </div>
         <input placeholder="이메일" value={email} onChange={(e) => setEmail(e.target.value)} />
