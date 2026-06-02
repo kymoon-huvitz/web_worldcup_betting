@@ -10,11 +10,19 @@ export default function Signup() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  const ALLOWED_NAMES = ['문광열', '이현철', '김용한', '김범모', '정찬교', '김영민',
+                         '하승석', '최은성', '심영길', '김현주', '김진호', '서은진', '김종훈', 
+                         '송준석', '견병우', '배현진', '오동건', '이현섭'];
+
   async function onSubmit(e) {
     e.preventDefault()
     setError('')
     if (!name.trim()) {
       setError('이름을 입력해주세요.')
+      return
+    }
+    if (!ALLOWED_NAMES.includes(name.trim())) {
+      setError('FID에 그런 사람이 있어요?')
       return
     }
     setLoading(true)

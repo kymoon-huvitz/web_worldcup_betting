@@ -40,6 +40,10 @@ function auth(req: AuthRequest, res: Response, next: NextFunction) {
 
 // ---------- routes ----------
 
+const ALLOWED_NAMES = ['문광열', '이현철', '김용한', '김범모', '정찬교', '김영민',
+                       '하승석', '최은성', '심영길', '김현주', '김진호', '서은진', '김종훈', 
+                       '송준석', '견병우', '배현진', '오동건', '이현섭'];
+
 // 회원가입
 app.post('/api/auth/signup', async (req: Request, res: Response) => {
   try {
@@ -48,11 +52,15 @@ app.post('/api/auth/signup', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Email, password, and name are required' });
     }
 
+    if (!ALLOWED_NAMES.includes(name.trim())) {
+      return res.status(403).json({ error: 'FID에 그런 사람이 있어요?' });
+    }
+
     const existingEmail = await prisma.user.findUnique({ where: { email } });
     if (existingEmail) return res.status(409).json({ error: '이미 사용 중인 이메일입니다.' });
 
     const existingName = await prisma.user.findUnique({ where: { name } });
-    if (existingName) return res.status(409).json({ error: '이미 사용 중인 이름입니다.' });
+    if (existingName) return res.status(409).json({ error: '이미 가입되어 있어요!!' });
 
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
@@ -75,10 +83,10 @@ app.post('/api/auth/login', async (req: Request, res: Response) => {
     if (!email || !password) return res.status(400).json({ error: 'email and password are required' });
 
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!user) return res.status(401).json({ error: '그런 아이디는 없습니다.' });
 
     const ok = await bcrypt.compare(password, user.passwordHash);
-    if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!ok) return res.status(401).json({ error: '비밀번호가 틀렸습니다.' });
 
     const token = signToken(user);
     res.json({
